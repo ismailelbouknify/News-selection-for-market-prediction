@@ -1,0 +1,17 @@
+experiment_name: topconf
+
+data:
+  input_jsonl: "data/processed/Input_t5.jsonl"
+
+task:
+  use_market: true
+  use_news: true
+  use_sentiment: true
+  use_miq: true
+
+selection:
+  cap_per_day: 10
+  news_select: "topconf"
+
+checkpoint:
+  best_model_path: "outputs/checkpoints/topconf/best_model.pt"

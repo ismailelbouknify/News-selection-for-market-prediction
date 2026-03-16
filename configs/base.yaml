@@ -1,0 +1,61 @@
+experiment_name: base
+
+data:
+  market_csv: "data/raw/market/sp500.csv"
+  embeddings_path: "data/interim/headline_embeddings_fp16.pt"
+  input_jsonl: "data/processed/Input_t5.jsonl"
+
+train:
+  seed: 2
+  seed_list: [0, 1, 2, 3, 4]
+  epochs: 50
+  batch_size: 4
+  lr: 0.001
+  amp: false
+  early_stop_patience: 100
+
+model:
+  temporal: "mlp"          # "mlp" | "lstm" | "cnn1d"
+  v1: 32
+  v2: 16
+  v3: 32
+  v4: 32
+  mlp_layers: 2
+  mlp_hidden: 64
+  attn_heads: 3
+  attn_head_dim: 32
+
+task:
+  decision_threshold: 0.5
+  rf_annual: 0.02
+  use_market: true
+  use_news: true
+  use_sentiment: true
+  use_miq: true
+  loss_name: "bce"         # "bce" | "focal"
+  focal_alpha: 1.0
+  focal_gamma: 3.0
+
+selection:
+  cap_per_day: null
+  news_select: null        # null | "topconf" | "kmeans" | "random" | "farthest"
+
+checkpoint:
+  best_select: "val_pnl"   # "val_pnl" | "val_sharpe" | "val_acc" | "val_loss"
+  use_best_for_test: true
+  best_model_path: "outputs/checkpoints/base/best_model.pt"
+
+tracking:
+  carbon_log_dir: "outputs/carbon"
+
+cv:
+  method: "kfold_time_cv"  # "kfold_time_cv" | "FININevaluation"
+  train_days: 2430
+  step_days: 340
+  max_windows: null
+  k: 10
+  window_size: 500
+  step: 391
+  paper_annualise_sharpe: false
+  paper_rf_is_annual: true
+  tdays: 252

@@ -1,0 +1,20 @@
+experiment_name: no_news
+
+data:
+  input_jsonl: "data/processed/Input_t5.jsonl"
+
+model:
+  temporal: "mlp"
+
+task:
+  use_market: true
+  use_news: false
+  use_sentiment: true
+  use_miq: false
+
+selection:
+  cap_per_day: null
+  news_select: null
+
+checkpoint:
+  best_model_path: "outputs/checkpoints/no_news/best_model.pt"

@@ -1,0 +1,17 @@
+experiment_name: kmeans
+
+data:
+  input_jsonl: "data/processed/Input_t5.jsonl"
+
+task:
+  use_market: true
+  use_news: true
+  use_sentiment: true
+  use_miq: true
+
+selection:
+  cap_per_day: 10
+  news_select: "kmeans"
+
+checkpoint:
+  best_model_path: "outputs/checkpoints/kmeans/best_model.pt"

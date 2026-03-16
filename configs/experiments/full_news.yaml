@@ -1,0 +1,17 @@
+experiment_name: full_news
+
+data:
+  input_jsonl: "data/processed/Input_t5.jsonl"
+
+task:
+  use_market: true
+  use_news: true
+  use_sentiment: true
+  use_miq: true
+
+selection:
+  cap_per_day: null
+  news_select: null
+
+checkpoint:
+  best_model_path: "outputs/checkpoints/full_news/best_model.pt"
