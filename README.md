@@ -101,22 +101,21 @@ On Windows:
 ```bash
 .venv\Scripts\activate
 ```
-
-### 2) Install dependencies
-
-```bash
-pip install --upgrade pip
-pip install -r requirements.txt
-pip install -e .
-```
-
-## Clone the Repository
+### 2) Clone the Repository
 
 First, clone the repository and move into the project folder:
 
 ```bash
 git clone https://github.com/ismailelbouknify/News-selection-for-market-prediction.git
 cd News-selection-for-market-prediction
+
+### 3) Install dependencies
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+pip install -e .
+```
 
 ## Datasets
 
