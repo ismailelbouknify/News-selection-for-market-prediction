@@ -108,6 +108,7 @@ First, clone the repository and move into the project folder:
 ```bash
 git clone https://github.com/ismailelbouknify/News-selection-for-market-prediction.git
 cd News-selection-for-market-prediction
+```
 
 ### 3) Install dependencies
 
