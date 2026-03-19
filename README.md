@@ -501,17 +501,8 @@ If you want to reproduce preprocessing from raw news, use:
 python scripts/download_external_data.py
 ```
 
----
 
-## Notes
-
-- Large files are hosted on Hugging Face instead of GitHub.
-- The local `data/.cache/` folder created by Hugging Face downloads should be ignored by Git.
-- If you use the external FNSPID news dataset, please follow its original license and citation requirements.
-
----
-
-## Suggested Citation
+## Citation
 
 If you use this repository, please cite the associated paper.
 ```bibtex
