@@ -521,8 +521,7 @@ python scripts/download_external_data.py
 
 ## Suggested Citation
 
-If you use this repository, please cite the associated paper or project report. You can replace the placeholder entry below with the final bibliographic record:
-
+If you use this repository, please cite the associated paper.
 ```bibtex
 @misc{greenfin_news_selection,
   title  = {Towards Green AI in Finance: News Selection for Efficient Financial Market Prediction},
