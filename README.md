@@ -1,6 +1,6 @@
 # GreenFin: News Selection for Efficient Financial Market Prediction
 
-Official repository for the project **"Towards Green AI in Finance: News Selection for Efficient Financial Market Prediction."**
+Official repository for the paper **"Towards Green AI in Finance: News Selection for Efficient Financial Market Prediction."**
 
 This project studies whether a **small, selected subset of daily financial headlines** can preserve predictive signal while reducing **training time, inference latency, energy consumption, and CO2 emissions** in news-augmented financial market prediction.
 
