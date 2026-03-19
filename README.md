@@ -10,14 +10,6 @@ This project studies whether a **small, selected subset of daily financial headl
 
 Financial forecasting pipelines often consume **all available daily news**, which can be expensive in terms of compute, energy, and carbon emissions. This repository introduces a **news selection stage** before downstream prediction and compares multiple selection strategies under a common evaluation pipeline.
 
-The repository supports the following experiment settings:
-
-- **No news**: market-only baseline
-- **Full news**: all available headlines
-- **TopConf**: confidence-based filtering using sentiment entropy
-- **KMeans**: representative headline selection via clustering
-- **Farthest**: diversity-based headline selection via farthest-point sampling
-
 The full workflow includes:
 
 1. News preprocessing and cleaning
