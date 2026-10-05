@@ -1,0 +1,31 @@
+# Practical trading evaluation (paper Table 8), look-back T=5.
+data:
+  market_csv: data/raw/market/sp500.csv
+  input_jsonl: data/processed/Input_t5.jsonl   # only dates and labels are read
+
+cv:                                 # must match the CV used to produce the predictions
+  train_days: 2430
+  step_days: 340
+
+risk_free_annual: 0.02              # fixed; daily rate = 0.02 / 252
+trading_days_per_year: 252
+transaction_costs_bps: [0, 5, 10, 20]
+ar_lags: [1, 2, 3, 4, 5]            # lag chosen by mean validation Sharpe (never test data)
+output_dir: results/trading
+
+models:
+  - name: GreenFin random k=10 (long/short)
+    predictions: outputs/runs/greenfin_random_k10/predictions.csv
+    strategy: long_short
+  - name: GreenFin topconf k=10 (long/short)
+    predictions: outputs/runs/greenfin_topconf_k10/predictions.csv
+    strategy: long_short
+  - name: GreenFin kmeans k=10 (long/short)
+    predictions: outputs/runs/greenfin_kmeans_k10/predictions.csv
+    strategy: long_short
+  - name: GreenFin farthest k=10 (long/short)
+    predictions: outputs/runs/greenfin_farthest_k10/predictions.csv
+    strategy: long_short
+  - name: GreenFin farthest k=10 (long/cash)
+    predictions: outputs/runs/greenfin_farthest_k10/predictions.csv
+    strategy: long_cash

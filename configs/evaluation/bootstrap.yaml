@@ -1,0 +1,22 @@
+# Paired moving-block bootstrap (paper Table 7).
+# Inputs are predictions.csv files written by scripts/experiments/run_experiment.py.
+n_boot: 10000
+block_length: 5                    # trading days; blocks never cross a test-window boundary
+sensitivity_block_lengths: [10, 20]
+rng_seed: 20260908
+alpha: 0.05
+output_dir: results/significance
+
+comparisons:
+  - label: GreenFin farthest k=10 vs FININ-Full
+    a: outputs/runs/greenfin_farthest_k10/predictions.csv
+    b: outputs/runs/finin_full/predictions.csv
+  - label: GreenFin farthest k=10 vs GreenFin-Full
+    a: outputs/runs/greenfin_farthest_k10/predictions.csv
+    b: outputs/runs/greenfin_full/predictions.csv
+  - label: GreenFin farthest k=10 vs GreenFin random k=10
+    a: outputs/runs/greenfin_farthest_k10/predictions.csv
+    b: outputs/runs/greenfin_random_k10/predictions.csv
+  - label: GreenFin farthest k=10 vs GreenFin-MarketOnly
+    a: outputs/runs/greenfin_farthest_k10/predictions.csv
+    b: outputs/runs/greenfin_market_only/predictions.csv

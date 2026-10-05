@@ -1,0 +1,14 @@
+# GreenFin-Selected: random selector, k=100, T=5.
+# Paper: Table 4 (selector x budget).
+experiment_name: greenfin_random_k100
+
+data:
+  input_jsonl: data/processed/Input_t5.jsonl
+
+task:
+  use_news: true
+  use_miq: false
+
+selection:
+  cap_per_day: 100
+  news_select: random

@@ -1,0 +1,14 @@
+# GreenFin-Selected: farthest selector, k=10, T=5. Primary GreenFin configuration of the paper.
+# Paper: Table 4 (selector x budget); also the GreenFin-Selected row of Table 3.
+experiment_name: greenfin_farthest_k10
+
+data:
+  input_jsonl: data/processed/Input_t5.jsonl
+
+task:
+  use_news: true
+  use_miq: false
+
+selection:
+  cap_per_day: 10
+  news_select: farthest

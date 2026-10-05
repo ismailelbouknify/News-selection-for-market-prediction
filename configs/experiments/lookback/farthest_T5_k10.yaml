@@ -1,0 +1,14 @@
+# Look-back experiment: GreenFin farthest selector, k=10, T=5.
+# Paper: Table 6 (look-back x budget).
+experiment_name: greenfin_farthest_T5_k10
+
+data:
+  input_jsonl: data/processed/Input_t5.jsonl
+
+task:
+  use_news: true
+  use_miq: false
+
+selection:
+  cap_per_day: 10
+  news_select: farthest

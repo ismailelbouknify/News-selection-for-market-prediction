@@ -1,0 +1,14 @@
+# GreenFin-MarketOnly: no news, market features only, T=5.
+# Paper: Table 3 (architecture ablation).
+experiment_name: greenfin_market_only
+
+data:
+  input_jsonl: data/processed/Input_t5.jsonl
+
+task:
+  use_news: false
+  use_miq: false
+
+selection:
+  cap_per_day: null
+  news_select: null

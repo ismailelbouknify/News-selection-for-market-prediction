@@ -1,25 +1,33 @@
+# Base configuration shared by every paper experiment.
+# Experiment YAMLs under configs/experiments/ are deep-merged on top of this file.
+#
+# Training hyper-parameters below are the values found in the experiment
+# scripts that produced the paper results (epochs=50, batch_size=4, lr=1e-3,
+# gradient accumulation 16 -> 64 samples per optimiser step). See
+# docs/REPRODUCIBILITY_AUDIT.md for how they compare with the manuscript text.
 experiment_name: base
 
 data:
-  market_csv: "data/raw/market/sp500.csv"
-  embeddings_path: "data/interim/headline_embeddings_fp16.pt"
-  input_jsonl: "data/processed/Input_t5.jsonl"
+  market_csv: data/raw/market/sp500.csv
+  embeddings_path: data/interim/headline_embeddings_fp16.pt
+  input_jsonl: data/processed/Input_t5.jsonl
 
 train:
-  seed: 2
+  seed: 2                       # placeholder; every seed in seed_list is run
   seed_list: [0, 1, 2, 3, 4]
   epochs: 50
   batch_size: 4
-  lr: 0.001
+  grad_accum_steps: 16
+  lr: 0.001                     # Adam
   amp: false
-  early_stop_patience: 100
+  early_stop_patience: 100      # effectively disabled for 50 epochs
 
 model:
-  temporal: "mlp"          # "mlp" | "lstm" | "cnn1d"
-  v1: 32
-  v2: 16
-  v3: 32
-  v4: 32
+  temporal: mlp                 # mlp | lstm | cnn1d
+  v1: 32                        # market encoder output dim
+  v2: 16                        # sentiment encoder output dim
+  v3: 32                        # headline-embedding encoder output dim
+  v4: 32                        # fused headline dim (overridden to attn_heads * attn_head_dim = 96)
   mlp_layers: 2
   mlp_hidden: 64
   attn_heads: 3
@@ -31,31 +39,30 @@ task:
   use_market: true
   use_news: true
   use_sentiment: true
-  use_miq: true
-  loss_name: "bce"         # "bce" | "focal"
+  use_miq: false                # false = GreenFin masked-mean pooling; true = FININ MIQ
+  loss_name: bce                # BCEWithLogitsLoss with pos_weight from the training split
   focal_alpha: 1.0
   focal_gamma: 3.0
 
 selection:
-  cap_per_day: null
-  news_select: null        # null | "topconf" | "kmeans" | "random" | "farthest"
+  cap_per_day: null             # daily headline budget k; null = all news
+  news_select: null             # random | topconf | kmeans | farthest
 
 checkpoint:
-  best_select: "val_pnl"   # "val_pnl" | "val_sharpe" | "val_acc" | "val_loss"
+  best_select: val_pnl          # model selection on the validation split
   use_best_for_test: true
-  best_model_path: "outputs/checkpoints/base/best_model.pt"
+  # best_model_path defaults to <output.root>/<experiment_name>/checkpoints/best_model.pt;
+  # one file per (seed, window) is derived from it.
 
 tracking:
-  carbon_log_dir: "outputs/carbon"
+  track_carbon: true            # CodeCarbon energy / CO2 for the training phase
+  carbon_save_to_file: true      # CSV written to <output.root>/<experiment_name>/carbon/
 
 cv:
-  method: "kfold_time_cv"  # "kfold_time_cv" | "FININevaluation"
-  train_days: 2430
+  method: kfold_time_cv         # paper protocol; FININevaluation = legacy FININ protocol
+  train_days: 2430              # window length W = train_days + step_days = 2770
   step_days: 340
   max_windows: null
-  k: 10
-  window_size: 500
-  step: 391
-  paper_annualise_sharpe: false
-  paper_rf_is_annual: true
-  tdays: 252
+
+output:
+  root: outputs/runs

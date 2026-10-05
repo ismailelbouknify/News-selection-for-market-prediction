@@ -1,0 +1,20 @@
+# Smoke version of configs/evaluation/trading.yaml (synthetic data, see configs/smoke/base.yaml).
+data:
+  market_csv: outputs/smoke/data/raw/market/sp500.csv
+  input_jsonl: outputs/smoke/data/processed/Input_t5.jsonl
+cv:
+  train_days: 60
+  step_days: 20
+  max_windows: 5
+risk_free_annual: 0.02
+trading_days_per_year: 252
+transaction_costs_bps: [0, 5, 10, 20]
+ar_lags: [1, 2, 3]
+output_dir: outputs/smoke/results/trading
+models:
+  - name: GreenFin farthest k=10 (long/short)
+    predictions: outputs/smoke/runs/greenfin_farthest_k10/predictions.csv
+    strategy: long_short
+  - name: GreenFin farthest k=10 (long/cash)
+    predictions: outputs/smoke/runs/greenfin_farthest_k10/predictions.csv
+    strategy: long_cash

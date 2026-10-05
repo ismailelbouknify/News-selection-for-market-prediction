@@ -1,0 +1,63 @@
+# Smoke-test base config: tiny CPU run on synthetic data.
+#   python scripts/data/make_synthetic_data.py --root outputs/smoke
+#   python scripts/experiments/run_experiment.py --base-config configs/smoke/base.yaml \
+#       --data-dir outputs/smoke --experiment-config configs/experiments/selectors/farthest_k10.yaml
+# Any paper experiment config can be combined with this base. Same keys as configs/base.yaml.
+experiment_name: smoke
+
+data:
+  market_csv: data/raw/market/sp500.csv
+  embeddings_path: data/interim/headline_embeddings_fp16.pt
+  input_jsonl: data/processed/Input_t5.jsonl
+
+train:
+  seed: 0
+  seed_list: [0, 1]
+  epochs: 2
+  batch_size: 4
+  grad_accum_steps: 2
+  lr: 0.001
+  amp: false
+  early_stop_patience: 100
+
+model:
+  temporal: mlp
+  v1: 32
+  v2: 16
+  v3: 32
+  v4: 32
+  mlp_layers: 2
+  mlp_hidden: 64
+  attn_heads: 3
+  attn_head_dim: 32
+
+task:
+  decision_threshold: 0.5
+  rf_annual: 0.02
+  use_market: true
+  use_news: true
+  use_sentiment: true
+  use_miq: false
+  loss_name: bce
+  focal_alpha: 1.0
+  focal_gamma: 3.0
+
+selection:
+  cap_per_day: null
+  news_select: null
+
+checkpoint:
+  best_select: val_pnl
+  use_best_for_test: true
+
+tracking:
+  track_carbon: false          # CodeCarbon is not meaningful for a seconds-long CPU run
+
+cv:
+  method: kfold_time_cv
+  train_days: 60               # window 80 samples, step 20 -> 5 windows of 64/8/8
+  step_days: 20
+  max_windows: 5
+
+output:
+  root: outputs/smoke/runs

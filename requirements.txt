@@ -1,12 +1,15 @@
+# Everything needed to run the experiments, rebuild the data and run the tests.
+# Install PyTorch first following https://pytorch.org if you need a specific CUDA build.
+# Exact versions of the research environment: environment/requirements-paper.txt
 numpy>=1.24,<3
 pandas>=2.0,<3
 scipy>=1.10,<2
 scikit-learn>=1.3,<2
 torch>=2.2
-transformers>=4.40,<5
 tqdm>=4.66,<5
-codecarbon>=2.3,<3
+codecarbon>=2.3,<4
 PyYAML>=6.0,<7
+transformers>=4.40,<5
 yfinance>=0.2,<1
+huggingface_hub>=0.23,<2
 pytest>=8,<9
-huggingface_hub>=0.23

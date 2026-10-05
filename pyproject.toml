@@ -4,31 +4,42 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "greenfin"
-version = "0.1.0"
-description = "News selection for efficient financial market prediction"
+version = "1.0.0"
+description = "GreenFin: Resource-Aware News Selection for Sustainable Financial Market Direction Forecasting"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-  { name = "Ismail ELBOUKNIFY" }
+  { name = "Ismail Elbouknify" },
+  { name = "Abdellah El Mekki" },
+  { name = "Marcos R. Machado" },
+  { name = "Maria Iannario" },
 ]
+keywords = ["financial forecasting", "news selection", "green AI", "S&P 500", "FNSPID"]
 dependencies = [
   "numpy>=1.24,<3",
   "pandas>=2.0,<3",
   "scipy>=1.10,<2",
   "scikit-learn>=1.3,<2",
   "torch>=2.2",
-  "transformers>=4.40,<5",
   "tqdm>=4.66,<5",
-  "codecarbon>=2.3,<3",
+  "codecarbon>=2.3,<4",
   "PyYAML>=6.0,<7",
-  "yfinance>=0.2,<1",
-  "huggingface_hub>=0.23,<2"
 ]
 
 [project.optional-dependencies]
-dev = [
-  "pytest>=8,<9"
+# Rebuilding the data from raw FNSPID / Yahoo Finance and downloading from Hugging Face.
+data = [
+  "transformers>=4.40,<5",
+  "yfinance>=0.2,<1",
+  "huggingface_hub>=0.23,<2",
 ]
+dev = [
+  "pytest>=8,<9",
+]
+
+[project.urls]
+Repository = "https://github.com/ismailelbouknify/News-selection-for-market-prediction"
+Dataset = "https://huggingface.co/datasets/ismail-ELBOUKNIFY/news-selection-for-market-prediction"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -39,3 +50,4 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+filterwarnings = ["ignore::FutureWarning", "ignore::DeprecationWarning"]

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import torch
 
+from .metrics import compute_pnl_sharpe, positions_from_predictions
 from .standardize import MarketStandardizer, to_device_and_scale
 
 
@@ -104,3 +105,56 @@ def evaluate_always_buy(val_or_test_loader, returns_map, rf_annual: float = 0.02
             sharpe = float("nan")
 
     return acc, pnl, sharpe
+
+
+@torch.no_grad()
+def predict(
+    model,
+    loader,
+    device,
+    threshold: float = 0.5,
+    scaler_ms: Optional[MarketStandardizer] = None,
+) -> List[Dict[str, Any]]:
+    """Per-sample predictions ``{date, y_true, prob_up, predicted_class}`` in loader order."""
+    model.eval()
+    records: List[Dict[str, Any]] = []
+    for raw_batch in loader:
+        batch = to_device_and_scale(raw_batch, device, scaler_ms)
+        logits, _ = model(batch["markets"], batch.get("news_emb"), batch.get("sentiments"), batch.get("pad_mask"))
+        probs = torch.sigmoid(logits).view(-1).cpu().numpy()
+        labels = batch["labels"].view(-1).cpu().numpy()
+        for d, y, p in zip(batch["dates"], labels, probs):
+            records.append(
+                {"date": d, "y_true": float(y), "prob_up": float(p), "predicted_class": float(p >= threshold)}
+            )
+    return records
+
+
+def summarize_predictions(
+    records: List[Dict[str, Any]],
+    returns_map: Dict[str, float],
+    rf_annual: float = 0.02,
+    tdays: int = 252,
+) -> Dict[str, float]:
+    """Accuracy / PnL / Sharpe from :func:`predict` output (same definitions as :func:`evaluate`).
+
+    Adds ``next_day_return``, ``position`` and ``strategy_return`` to every
+    record in place (NaN where the next-day return is unavailable).
+    """
+    n_correct = 0
+    trading_returns: List[float] = []
+    for rec in records:
+        n_correct += int(rec["predicted_class"] == rec["y_true"])
+        position = float(positions_from_predictions([rec["predicted_class"]])[0])
+        r = returns_map.get(rec["date"])
+        rec["position"] = position
+        if r is None or not np.isfinite(r):
+            rec["next_day_return"] = float("nan")
+            rec["strategy_return"] = float("nan")
+            continue
+        rec["next_day_return"] = float(r)
+        rec["strategy_return"] = position * float(r)
+        trading_returns.append(rec["strategy_return"])
+    acc = n_correct / len(records) if records else 0.0
+    pnl, sharpe = compute_pnl_sharpe(trading_returns, rf_annual, tdays)
+    return {"acc": float(acc), "pnl": float(pnl), "sharpe": float(sharpe)}

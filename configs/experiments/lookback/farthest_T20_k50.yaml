@@ -1,0 +1,15 @@
+# Look-back experiment: GreenFin farthest selector, k=50, T=20.
+# Paper: Table 6 (look-back x budget).
+# Note: Input_t20.jsonl has ~4,120 samples, so W=2770 / step=340 yields 4 windows (not 5).
+experiment_name: greenfin_farthest_T20_k50
+
+data:
+  input_jsonl: data/processed/Input_t20.jsonl
+
+task:
+  use_news: true
+  use_miq: false
+
+selection:
+  cap_per_day: 50
+  news_select: farthest

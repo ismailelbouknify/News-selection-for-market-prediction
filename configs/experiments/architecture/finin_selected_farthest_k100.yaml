@@ -1,0 +1,14 @@
+# FININ-Selected: FININ MIQ architecture on farthest-point selected news, k=100, T=5.
+# Paper: Table 3 (architecture ablation).
+experiment_name: finin_selected_farthest_k100
+
+data:
+  input_jsonl: data/processed/Input_t5.jsonl
+
+task:
+  use_news: true
+  use_miq: true
+
+selection:
+  cap_per_day: 100
+  news_select: farthest
