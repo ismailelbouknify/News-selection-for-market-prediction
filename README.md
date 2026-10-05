@@ -35,6 +35,7 @@ GreenFin (masked-mean pooling) or FININ (market-aware attention) forecaster
         ↓
 next-day direction → accuracy, PnL, Sharpe, energy / CO₂
 ```
+### 2) Clone the Repository
 
 Selectors (`selection.news_select`): `random`; `topconf` (lowest-entropy
 FinBERT sentiment, i.e. most confident); `kmeans` (headline nearest each
@@ -203,9 +204,3 @@ an unpublished manuscript:
 }
 ```
 
-Please also cite FNSPID if you use its data.
-
-## License
-
-No license has been selected yet; until a `LICENSE` file is added, all rights
-are reserved by the authors.
