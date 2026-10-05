@@ -156,8 +156,6 @@ Both use small synthetic data. They need neither FNSPID nor a GPU.
 
 ## Citation
 
-Citation metadata is in [CITATION.cff](CITATION.cff). The paper is currently
-an unpublished manuscript:
 
 ```bibtex
 @unpublished{elbouknify_greenfin,
