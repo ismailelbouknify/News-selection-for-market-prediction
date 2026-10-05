@@ -1,0 +1,14 @@
+# FININ-Full: FININ MIQ interaction architecture, all news, T=5.
+# Paper: Table 3 (architecture ablation).
+experiment_name: finin_full
+
+data:
+  input_jsonl: data/processed/Input_t5.jsonl
+
+task:
+  use_news: true
+  use_miq: true
+
+selection:
+  cap_per_day: null
+  news_select: null

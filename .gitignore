@@ -1,0 +1,52 @@
+# --- Data (downloaded or rebuilt; never committed) ---
+/data/
+*.jsonl
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.parquet
+*.zip
+*.tar
+*.tar.gz
+
+# --- Run outputs (checkpoints, logs, CodeCarbon raw files, smoke tests) ---
+outputs/
+emissions*.csv
+*.out
+*.err
+slurm-*.out
+wandb/
+mlruns/
+
+# --- Caches ---
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.hf_download/
+.ipynb_checkpoints/
+*.egg-info/
+build/
+dist/
+
+# --- Environments ---
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# --- Secrets ---
+*.pem
+*.key
+.netrc
+.huggingface/

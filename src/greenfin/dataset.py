@@ -5,6 +5,8 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import torch
 from torch.utils.data import Dataset
 
+from .windows import split_indices
+
 
 class Sample:
     __slots__ = ("date", "markets", "headline_ids", "sentiments", "label")
@@ -70,10 +72,8 @@ class GreenFinDataset(Dataset):
 
 
 def make_splits(ds: GreenFinDataset, train: float = 0.8, val: float = 0.1) -> Tuple[List[int], List[int], List[int]]:
-    n = len(ds)
-    n_train = int(n * train)
-    n_val = int(n * val)
-    return list(range(0, n_train)), list(range(n_train, n_train + n_val)), list(range(n_train + n_val, n))
+    """Chronological 80/10/10 split of a (date-sorted) window; see :mod:`greenfin.windows`."""
+    return split_indices(len(ds), train=train, val=val)
 
 
 def clone_dataset(ds: GreenFinDataset) -> GreenFinDataset:

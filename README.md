@@ -1,517 +1,206 @@
-# GreenFin: News Selection for Efficient Financial Market Prediction
+# GreenFin
 
-Official repository for the paper **"Towards Green AI in Finance: News Selection for Efficient Financial Market Prediction."**
+**Resource-Aware News Selection for Sustainable Financial Market Direction Forecasting**
 
-This project studies whether a **small, selected subset of daily financial headlines** can preserve predictive signal while reducing **training time, inference latency, energy consumption, and CO2 emissions** in news-augmented financial market prediction.
-
----
+[![tests](https://github.com/ismailelbouknify/News-selection-for-market-prediction/actions/workflows/tests.yml/badge.svg)](https://github.com/ismailelbouknify/News-selection-for-market-prediction/actions/workflows/tests.yml)
+![python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)
 
 ## Overview
 
-Financial forecasting pipelines often consume **all available daily news**, which can be expensive in terms of compute, energy, and carbon emissions. This repository introduces a **news selection stage** before downstream prediction and compares multiple selection strategies under a common evaluation pipeline.
+GreenFin forecasts the next-day direction of the S&P 500 from market data and
+financial news while processing far less text. Instead of passing every
+available headline to the forecaster, it selects a small fixed budget of k
+headlines per trading day and forecasts from these with a lightweight
+masked-mean architecture.
 
-The full workflow includes:
+This repository contains the implementation, experiment configurations and
+reproduction pipeline for the paper *GreenFin: Resource-Aware News Selection
+for Sustainable Financial Market Direction Forecasting* (Ismail Elbouknify,
+Abdellah El Mekki, Marcos R. Machado, Maria Iannario).
 
-1. News preprocessing and cleaning
-2. S&P 500 market data download
-3. FinBERT sentiment inference
-4. RoBERTa headline embedding extraction
-5. JSONL dataset creation for multiple lookback windows
-6. Model training and time-series cross-validation
-7. Trading and Green AI evaluation
+## Method
 
----
+<p align="center">
+  <img src="docs/figures/greenfin_overview.png" alt="GreenFin overview: daily news selection, encoding and fusion, pooling and prediction" width="100%">
+</p>
 
-## Repository Structure
-
-```text
-.
-├── configs/
-│   ├── base.yaml
-│   └── experiments/
-│       ├── no_news.yaml
-│       ├── full_news.yaml
-│       ├── topconf.yaml
-│       ├── kmeans.yaml
-│       └── farthest.yaml
-├── data/
-│   ├── raw/
-│   │   ├── market/
-│   │   └── news/
-│   ├── interim/
-│   └── processed/
-├── outputs/
-│   ├── carbon/
-│   ├── checkpoints/
-│   ├── logs/
-│   └── results/
-├── scripts/
-│   ├── preprocess/
-│   │   ├── build_cleaned_news.py
-│   │   ├── download_sp500.py
-│   │   └── preprocess_all.py
-│   ├── download_data.py
-│   ├── download_external_data.py
-│   ├── build_sentiment.py
-│   ├── build_embeddings.py
-│   ├── build_dataset.py
-│   └── run_experiment.py
-├── src/
-│   └── greenfin/
-│       ├── __init__.py
-│       ├── collate.py
-│       ├── config.py
-│       ├── cv.py
-│       ├── dataset.py
-│       ├── evaluate.py
-│       ├── io.py
-│       ├── layers.py
-│       ├── metrics.py
-│       ├── model.py
-│       ├── selection.py
-│       ├── standardize.py
-│       └── train.py
-├── tests/
-├── pyproject.toml
-├── requirements.txt
-└── README.md
 ```
-
----
-
-## Installation
-
-### 1) Create and activate a Python environment
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-```
-
-On Windows:
-
-```bash
-.venv\Scripts\activate
+FNSPID headlines + S&P 500 prices
+        ↓
+RoBERTa headline embeddings + FinBERT sentiment (frozen, computed once)
+        ↓
+daily news selection: at most k headlines per day
+        ↓
+GreenFin (masked-mean pooling) or FININ (market-aware attention) forecaster
+        ↓
+next-day direction → accuracy, PnL, Sharpe, energy / CO₂
 ```
 ### 2) Clone the Repository
 
-First, clone the repository and move into the project folder:
+Selectors (`selection.news_select`): `random`; `topconf` (lowest-entropy
+FinBERT sentiment, i.e. most confident); `kmeans` (headline nearest each
+MiniBatch k-means centroid); `farthest` (farthest-point diversity sampling of
+the embeddings). A full-resolution figure is in
+[docs/figures/greenfin_overview.pdf](docs/figures/greenfin_overview.pdf).
+
+Models are evaluated with sliding-window time-series cross-validation (window
+of 2,770 trading days, step 340, chronological 80/10/10 split, seeds 0–4) using
+the tradable long/short PnL and annualised Sharpe ratio. Energy and CO₂ are
+measured with CodeCarbon. Detailed protocol notes are in
+[docs/REPRODUCIBILITY_AUDIT.md](docs/REPRODUCIBILITY_AUDIT.md).
+
+## Installation
+
+Python 3.10–3.12. If you need a specific CUDA build of PyTorch, install it
+first from [pytorch.org](https://pytorch.org).
 
 ```bash
 git clone https://github.com/ismailelbouknify/News-selection-for-market-prediction.git
 cd News-selection-for-market-prediction
+python -m venv .venv
+source .venv/bin/activate
+pip install -U pip
+pip install -e ".[data,dev]"
 ```
 
-### 3) Install dependencies
+The `data` extra is needed only for downloading and preprocessing, and `dev`
+only for the tests. `requirements.txt` installs the same packages, and
+`environment/requirements-paper.txt` lists the exact research versions. All
+commands below are run from the repository root.
 
-```bash
-pip install --upgrade pip
-pip install -r requirements.txt
-pip install -e .
+## Data
+
+| Source | Content |
+|---|---|
+| [FNSPID](https://huggingface.co/datasets/Zihan1004/FNSPID) | raw financial news (~23 GB) |
+| Yahoo Finance `^GSPC` | S&P 500 daily prices |
+| [GreenFin dataset](https://huggingface.co/datasets/ismail-ELBOUKNIFY/news-selection-for-market-prediction) | preprocessed files used in the paper |
+
+No data are stored in this repository. Everything lives under `data/`, which
+is git-ignored:
+
 ```
-
-## Datasets
-
-### 1) Project dataset on Hugging Face
-
-Processed experiment files and market data are hosted here:
-
-**GreenFin dataset:**  
-https://huggingface.co/datasets/ismail-ELBOUKNIFY/news-selection-for-market-prediction
-
-This dataset currently provides:
-
-- `processed/Input_t1.jsonl`
-- `processed/Input_t3.jsonl`
-- `processed/Input_t5.jsonl`
-- `processed/Input_t10.jsonl`
-- `processed/Input_t20.jsonl`
-- `raw/market/sp500.csv`
-
-### 2) External raw news dataset
-
-The raw news file used for preprocessing is hosted separately here:
-
-**FNSPID dataset:**  
-https://huggingface.co/datasets/Zihan1004/FNSPID
-
-This repository uses the external file:
-
-- `data/raw/news/nasdaq_external_data.csv`
-
-for full preprocessing and dataset regeneration.
-
----
-
-## Data Setup
-
-Data should be downloaded from Hugging Face.
-
-Expected local structure after download:
-
-```text
 data/
-├── raw/
-│   ├── news/
-│   │   └── nasdaq_external_data.csv
-│   └── market/
-│       └── sp500.csv
-├── interim/
-│   ├── cleaned_news_sentiment.csv
-│   └── headline_embeddings_fp16.pt
-└── processed/
-    ├── Input_t1.jsonl
-    ├── Input_t3.jsonl
-    ├── Input_t5.jsonl
-    ├── Input_t10.jsonl
-    └── Input_t20.jsonl
+├── raw/market/sp500.csv                    # S&P 500 prices
+├── raw/news/nasdaq_external_data.csv       # raw FNSPID news (rebuild only)
+├── interim/cleaned_news.csv                # cleaned news (rebuild only)
+├── interim/cleaned_news_sentiment.csv      # FinBERT logits (rebuild only)
+├── interim/headline_embeddings_fp16.pt     # RoBERTa embeddings (~22 GB)
+└── processed/Input_t{1,3,5,10,20}.jsonl    # one dataset per look-back T
 ```
 
-### Option A: Download processed project data only
-
-This is the fastest option if you want to run experiments directly.
+The quickest way to get started is to download the preprocessed data (~53 GB
+in total; add `--lookbacks 5` for the T = 5 experiments only):
 
 ```bash
-python scripts/download_data.py
+python scripts/data/download_data.py
 ```
 
-This downloads the processed JSONL datasets and market data from:
+## Preprocessing
 
-https://huggingface.co/datasets/ismail-ELBOUKNIFY/news-selection-for-market-prediction
-
-### Option B: Download the external raw news file
-
-If you want to reproduce the full preprocessing pipeline from raw news, run:
+To rebuild the data from raw sources instead (a GPU is strongly recommended
+for steps 3–4; add `--allow-cpu` to run them on CPU):
 
 ```bash
-python scripts/download_external_data.py
+python scripts/data/download_external_data.py   # 1. raw FNSPID news
+python scripts/data/preprocess_all.py           # 2. clean news, download S&P 500 prices
+python scripts/data/build_sentiment.py          # 3. FinBERT sentiment
+python scripts/data/build_embeddings.py         # 4. RoBERTa embeddings
+python scripts/data/build_dataset.py            # 5. look-back datasets T = 1, 3, 5, 10, 20
 ```
 
-This downloads the raw news file from:
+Headlines are assigned to their UTC calendar date, as in the paper's data.
+A 16:00 New York market-close alignment is available with
+`preprocess_all.py --keep-timestamp` and `build_dataset.py --alignment market_close`.
 
-https://huggingface.co/datasets/Zihan1004/FNSPID
+## Quick start
 
-### Recommended usage
-
-- Use `download_data.py` if you want to **run experiments immediately**
-- Use `download_external_data.py` if you want to **rebuild the pipeline from raw news**
-
----
-
-## Quick Start
-
-### Download processed data
+Run the primary configuration, GreenFin-Selected (farthest-point selection,
+k = 10, T = 5), over 5 windows × 5 seeds:
 
 ```bash
-python scripts/download_data.py
+python scripts/experiments/run_experiment.py \
+    --experiment-config configs/experiments/selectors/farthest_k10.yaml
 ```
 
-### Print experiment configuration
+Add `--seeds 0` for a single seed or `--print-config` to inspect the merged
+configuration without running. Each run writes `config.yaml`, `summary.json`,
+`windows.csv`, `predictions.csv`, `checkpoints/` and `carbon/` to
+`outputs/runs/<experiment_name>/`.
+
+Each experiment YAML overrides `configs/base.yaml`. The main options are:
+
+| Option | Config key |
+|---|---|
+| selector | `selection.news_select` |
+| k (headlines per day) | `selection.cap_per_day` (`null` = all news) |
+| T (look-back days) | `data.input_jsonl`: `data/processed/Input_t{T}.jsonl` |
+| architecture | `task.use_miq` (`false` = GreenFin, `true` = FININ), `task.use_news` |
+| seeds | `train.seed_list` |
+| data paths | `data.market_csv`, `data.embeddings_path`, `data.input_jsonl` |
+
+## Reproducing the paper
+
+| Experiment | Command | Hardware |
+|---|---|---|
+| Architecture ablation (Table 3) | `bash scripts/reproduce/table3_architecture.sh` | GPU |
+| Selector × budget (Table 4) | `bash scripts/reproduce/table4_selectors.sh` | GPU |
+| Look-back × budget (Table 6) | `bash scripts/reproduce/table6_lookback.sh` | GPU |
+| Paired block bootstrap (Table 7) | `bash scripts/reproduce/table7_bootstrap.sh` | CPU, after Tables 3–4 |
+| Practical trading (Table 8) | `bash scripts/reproduce/table8_trading.sh` | CPU, after Table 4 |
+
+Summary tables are written to `results/` (see [results/README.md](results/README.md)).
+GPU runs need about 22 GB of host RAM for the embedding file; the paper's jobs
+requested 128 GB. On a SLURM cluster, `bash scripts/hpc/submit_grid.sh
+<architecture|selectors|lookback>` submits one job per config. With the
+2,770-day window, T = 20 yields 4 CV windows instead of 5.
+
+## Results
+
+In the paper, the best GreenFin configuration uses **farthest-point selection
+with k = 10 headlines per day and a look-back of T = 5 days**. It reaches
+directional accuracy similar to the FININ model using all news (FININ-Full),
+with about 98% lower training time, energy and CO₂ in the **downstream
+forecasting stage**. Both models share the same one-off RoBERTa/FinBERT
+encoding of the corpus, so this is not an end-to-end saving.
+`scripts/evaluation/aggregate_results.py --upstream-carbon` reports the
+end-to-end figures. Exact values are given in the paper.
+
+## Repository structure
+
+```
+src/greenfin/          core library: model, selectors, CV, metrics, trading, bootstrap
+scripts/data/          data download and preprocessing
+scripts/experiments/   run_experiment.py, the single entry point for one experiment
+scripts/evaluation/    result aggregation, bootstrap significance, practical trading
+scripts/reproduce/     one script per paper table, plus a CPU smoke test
+scripts/hpc/           optional SLURM templates
+configs/               base.yaml and experiment, evaluation and smoke-test configs
+tests/                 pytest suite (synthetic data, CPU only)
+results/               small result tables written by the reproduction scripts
+docs/                  reproducibility notes and the overview figure
+environment/           exact package versions of the research environment
+```
+
+## Testing
 
 ```bash
-python scripts/run_experiment.py \
-  --base-config configs/base.yaml \
-  --experiment-config configs/experiments/no_news.yaml \
-  --print-config
+pytest
+bash scripts/reproduce/smoke_test.sh   # optional end-to-end check on CPU (~5 min)
 ```
 
-### Run the market-only baseline
-
-```bash
-python scripts/run_experiment.py \
-  --experiment-config configs/experiments/no_news.yaml
-```
-
----
-
-## End-to-End Pipeline
-
-There are two ways to use this repository.
-
-### Path 1: Run experiments from downloaded processed data
-
-If you only want to run the experiments, download the hosted project data first:
-
-```bash
-python scripts/download_data.py
-```
-
-Then run:
-
-```bash
-python scripts/run_experiment.py \
-  --base-config configs/base.yaml \
-  --experiment-config configs/experiments/no_news.yaml
-```
-
-Other experiment configs:
-
-```bash
-python scripts/run_experiment.py --experiment-config configs/experiments/full_news.yaml
-python scripts/run_experiment.py --experiment-config configs/experiments/topconf.yaml
-python scripts/run_experiment.py --experiment-config configs/experiments/kmeans.yaml
-python scripts/run_experiment.py --experiment-config configs/experiments/farthest.yaml
-```
-
-### Path 2: Rebuild everything from raw data
-
-If you want to fully regenerate the dataset from raw news:
-
-#### Step 1: Download external raw news data
-
-```bash
-python scripts/download_external_data.py
-```
-
-#### Step 2: Clean raw news and download S&P 500 data
-
-```bash
-python scripts/preprocess/preprocess_all.py \
-  --news-input data/raw/news/nasdaq_external_data.csv \
-  --news-output data/interim/cleaned_news.csv \
-  --market-output data/raw/market/sp500.csv \
-  --ticker ^GSPC \
-  --start 2007-07-23 \
-  --end 2024-01-01 \
-  --interval 1d
-```
-
-This step:
-
-- cleans the raw news CSV
-- removes duplicates and invalid dates
-- removes rows containing Cyrillic text in the title/article fields
-- downloads S&P 500 daily data from Yahoo Finance
-
-#### Step 3: Run FinBERT sentiment inference
-
-```bash
-python scripts/build_sentiment.py
-```
-
-This script reads:
-
-- `data/interim/cleaned_news.csv`
-
-and writes:
-
-- `data/interim/cleaned_news_sentiment.csv`
-
-By default, this script uses:
-
-- model: `ProsusAI/finbert`
-- `REQUIRE_CUDA = True`
-
-If you want CPU inference, edit `scripts/build_sentiment.py` and set:
-
-```python
-REQUIRE_CUDA = False
-```
-
-#### Step 4: Build headline embeddings with RoBERTa
-
-```bash
-python scripts/build_embeddings.py
-```
-
-This script reads:
-
-- `data/interim/cleaned_news_sentiment.csv`
-
-and writes:
-
-- `data/interim/headline_embeddings_fp16.pt`
-
-By default, this script uses:
-
-- model: `roberta-base`
-- text column: `Article_title`
-- `REQUIRE_CUDA = True`
-
-If needed, edit `scripts/build_embeddings.py` and set:
-
-```python
-REQUIRE_CUDA = False
-```
-
-#### Step 5: Build input JSONL datasets
-
-```bash
-python scripts/build_dataset.py
-```
-
-This script creates lookback datasets for:
-
-- `t = 1`
-- `t = 3`
-- `t = 5`
-- `t = 10`
-- `t = 20`
-
-and saves them under:
-
-- `data/processed/Input_t1.jsonl`
-- `data/processed/Input_t3.jsonl`
-- `data/processed/Input_t5.jsonl`
-- `data/processed/Input_t10.jsonl`
-- `data/processed/Input_t20.jsonl`
-
-#### Step 6: Run an experiment
-
-```bash
-python scripts/run_experiment.py \
-  --base-config configs/base.yaml \
-  --experiment-config configs/experiments/no_news.yaml
-```
-
----
-
-## Example Experiments
-
-### Market-only baseline
-
-```bash
-python scripts/run_experiment.py \
-  --experiment-config configs/experiments/no_news.yaml
-```
-
-### Full-news model
-
-```bash
-python scripts/run_experiment.py \
-  --experiment-config configs/experiments/full_news.yaml
-```
-
-### TopConf headline selection
-
-```bash
-python scripts/run_experiment.py \
-  --experiment-config configs/experiments/topconf.yaml
-```
-
-### KMeans headline selection
-
-```bash
-python scripts/run_experiment.py \
-  --experiment-config configs/experiments/kmeans.yaml
-```
-
-### Farthest-point headline selection
-
-```bash
-python scripts/run_experiment.py \
-  --experiment-config configs/experiments/farthest.yaml
-```
-
----
-
-## Configuration Overview
-
-Main configuration sections are defined in `configs/base.yaml`:
-
-- `data`: dataset and embedding paths
-- `train`: seeds, epochs, batch size, learning rate, AMP, early stopping
-- `model`: temporal backbone and hidden dimensions
-- `task`: market/news usage, sentiment usage, MIQ, loss settings
-- `selection`: daily news cap and selection strategy
-- `checkpoint`: best-model selection metric and checkpoint path
-- `tracking`: CodeCarbon output directory
-- `cv`: time-series evaluation protocol
-
-Supported temporal backbones:
-
-- `mlp`
-- `lstm`
-- `cnn1d`
-
-Supported selection modes:
-
-- `topconf`
-- `kmeans`
-- `random`
-- `farthest`
-
-Supported CV modes:
-
-- `kfold_time_cv`
-- `FININevaluation`
-
----
-
-## Dataset Format
-
-Each line in the generated JSONL file has the following structure:
-
-```json
-{
-  "date": "YYYY-MM-DD",
-  "markets": [[...], [...], ...],
-  "headline_ids": [[...], [...], ...],
-  "sentiments": [[[positive, negative, neutral], ...], ...],
-  "label": 0
-}
-```
-
-Where:
-
-- `date` is the target market day
-- `markets` contains the rolling market window with features `[Open, High, Low, Close, Volume]`
-- `headline_ids` stores per-day headline IDs aligned with the lookback window
-- `sentiments` stores per-headline sentiment vectors aligned with `headline_ids`
-- `label = 1` if `Close_{t+1} > Close_t`, otherwise `0`
-
----
-
-## Outputs
-
-Training and evaluation artifacts are written to:
-
-```text
-outputs/
-├── carbon/         # CodeCarbon emissions logs
-├── checkpoints/    # saved model checkpoints
-├── logs/           # optional logs
-└── results/        # experiment summaries / reports
-```
-
-The best checkpoint path is controlled by each experiment YAML file, for example:
-
-```yaml
-checkpoint:
-  best_model_path: "outputs/checkpoints/topconf/best_model.pt"
-```
-
----
-
-## Running Tests
-
-```bash
-pytest -q
-```
-
-If you want to download the hosted project data before running experiments, use:
-
-```bash
-python scripts/download_data.py
-```
-
-If you want to reproduce preprocessing from raw news, use:
-
-```bash
-python scripts/download_external_data.py
-```
-
+Both use small synthetic data. They need neither FNSPID nor a GPU.
 
 ## Citation
 
-If you use this repository, please cite the associated paper.
+Citation metadata is in [CITATION.cff](CITATION.cff). The paper is currently
+an unpublished manuscript:
+
 ```bibtex
-@misc{greenfin_news_selection,
-  title  = {Towards Green AI in Finance: News Selection for Efficient Financial Market Prediction},
-  author = {Ismail ELBOUKNIFY},
-  year   = {2026},
-  note   = {GitHub repository}
+@unpublished{elbouknify_greenfin,
+  title  = {GreenFin: Resource-Aware News Selection for Sustainable Financial Market Direction Forecasting},
+  author = {Elbouknify, Ismail and El Mekki, Abdellah and Machado, Marcos R. and Iannario, Maria},
+  note   = {Manuscript},
 }
 ```
 
----

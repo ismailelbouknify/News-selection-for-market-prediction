@@ -1,0 +1,14 @@
+# GreenFin-Full: masked-mean pooling, all news, T=5.
+# Paper: Table 3 (architecture ablation).
+experiment_name: greenfin_full
+
+data:
+  input_jsonl: data/processed/Input_t5.jsonl
+
+task:
+  use_news: true
+  use_miq: false
+
+selection:
+  cap_per_day: null
+  news_select: null

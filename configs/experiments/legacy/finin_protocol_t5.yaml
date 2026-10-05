@@ -1,0 +1,25 @@
+# LEGACY: original FININ backtest protocol (10 windows of 500 samples, stride 391).
+# Not used for any result in the GreenFin paper; kept only to compare with the
+# FININ publication. Reports both the tradable long/short metric and the legacy
+# FININ metric (pnl_legacy_finin / sharpe_legacy_finin), see greenfin/metrics.py.
+experiment_name: legacy_finin_protocol_t5
+
+data:
+  input_jsonl: data/processed/Input_t5.jsonl
+
+task:
+  use_news: true
+  use_miq: true
+
+selection:
+  cap_per_day: null
+  news_select: null
+
+
+cv:
+  method: FININevaluation
+  k: 10
+  window_size: 500
+  step: 391
+  legacy_annualise_sharpe: false
+  legacy_rf_is_annual: true

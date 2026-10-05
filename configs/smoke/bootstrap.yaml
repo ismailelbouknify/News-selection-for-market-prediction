@@ -1,0 +1,11 @@
+# Smoke version of configs/evaluation/bootstrap.yaml (synthetic data).
+n_boot: 200
+block_length: 5
+sensitivity_block_lengths: [3]
+rng_seed: 20260908
+alpha: 0.05
+output_dir: outputs/smoke/results/significance
+comparisons:
+  - label: GreenFin farthest k=10 vs FININ-Full
+    a: outputs/smoke/runs/greenfin_farthest_k10/predictions.csv
+    b: outputs/smoke/runs/finin_full/predictions.csv

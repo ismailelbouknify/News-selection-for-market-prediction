@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the GreenFin paper."
+title: "GreenFin: Resource-Aware News Selection for Sustainable Financial Market Direction Forecasting"
+type: software
+authors:
+  - family-names: Elbouknify
+    given-names: Ismail
+  - family-names: El Mekki
+    given-names: Abdellah
+  - family-names: Machado
+    given-names: Marcos R.
+  - family-names: Iannario
+    given-names: Maria
+repository-code: "https://github.com/ismailelbouknify/News-selection-for-market-prediction"
+version: 1.0.0
+keywords:
+  - financial market forecasting
+  - news selection
+  - green AI
+  - carbon accounting
+  - S&P 500
+preferred-citation:
+  type: unpublished
+  title: "GreenFin: Resource-Aware News Selection for Sustainable Financial Market Direction Forecasting"
+  authors:
+    - family-names: Elbouknify
+      given-names: Ismail
+    - family-names: El Mekki
+      given-names: Abdellah
+    - family-names: Machado
+      given-names: Marcos R.
+    - family-names: Iannario
+      given-names: Maria
+  notes: "Manuscript. Publication details will be added once available."
