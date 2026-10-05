@@ -8,7 +8,7 @@
 ## Overview
 GreenFin forecasts the next-day direction of the S&P 500 from market data and financial news while processing far less text. Instead of passing every available headline to the forecaster, it selects a small fixed budget of k headlines per trading day and forecasts from these with a lightweight masked-mean architecture.
 
-This repository contains the implementation, experiment configurations and reproduction pipeline for the paper *GreenFin: Resource-Aware News Selection for Sustainable Financial Market Direction Forecasting* (Ismail Elbouknify, Abdellah El Mekki, Marcos R. Machado, Maria Iannario).
+This repository contains the implementation, experiment configurations and reproduction pipeline for the paper *GreenFin: Resource-Aware News Selection for Sustainable Financial Market Direction Forecasting*.
 
 ## Method
 
